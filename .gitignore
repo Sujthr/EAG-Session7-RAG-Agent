@@ -1,0 +1,29 @@
+# API keys — never commit
+Gateway/.env
+S7Code/S7code/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# uv / pip
+.uv/
+*.lock
+!S7Code/S7code/uv.lock
+!Gateway/llm_gatewayV7/uv.lock
+
+# Generated / runtime state
+S7Code/S7code/state/
+S7Code/S7code/logs/
+S7Code/S7code/traces/
+Gateway/llm_gatewayV7/gateway_v7.db
+Gateway/__MACOSX/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.tmp

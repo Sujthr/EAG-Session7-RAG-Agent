@@ -1,0 +1,12 @@
+mcp[cli]
+httpx
+ddgs
+tavily-python
+crawl4ai
+python-dotenv
+pydantic>=2.0
+faiss-cpu>=1.8
+numpy>=1.26
+streamlit>=1.35
+pytest
+pytest-asyncio

@@ -1,0 +1,21 @@
+# secrets / env
+.env
+.env.*
+!.env.example
+
+# runtime state
+state/
+usage.json
+
+# sandbox: keep papers/ corpus, ignore downloads and temp files
+sandbox/downloads/
+sandbox/*.tmp
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# os
+.DS_Store

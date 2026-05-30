@@ -37,13 +37,15 @@ class TeeWriter(io.TextIOBase):
     def write(self, s: str) -> int:
         self._original.write(s)
         self._original.flush()
-        self._log.write(s)
-        self._log.flush()
+        if not self._log.closed:
+            self._log.write(s)
+            self._log.flush()
         return len(s)
 
     def flush(self) -> None:
         self._original.flush()
-        self._log.flush()
+        if not self._log.closed:
+            self._log.flush()
 
     def close_log(self) -> None:
         self._log.write(f"\n# Log closed {datetime.utcnow().isoformat()}Z\n")

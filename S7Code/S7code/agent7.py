@@ -94,7 +94,11 @@ async def run(query: str) -> str:
                 print(f"[memory.read]   {len(hits)} hits")
 
                 # 2. PERCEPTION
-                obs = perception.observe(query, hits, history, prior_goals, run_id)
+                try:
+                    obs = perception.observe(query, hits, history, prior_goals, run_id)
+                except Exception as e:
+                    print(f"[perception] LLM call failed ({e!r}), skipping iteration")
+                    continue
                 prior_goals = obs.goals
                 for g in obs.goals:
                     flag = "✓" if g.done else "○"
@@ -118,7 +122,11 @@ async def run(query: str) -> str:
                     print(f"[attach]        {goal.attach_artifact_id} ({len(blob)} bytes)")
 
                 # 3. DECISION
-                out = decision.next_step(goal, hits, attached, history, tools_for_decision)
+                try:
+                    out = decision.next_step(goal, hits, attached, history, tools_for_decision)
+                except Exception as e:
+                    print(f"[decision] LLM call failed ({e!r}), skipping iteration")
+                    continue
 
                 if out.is_answer:
                     print(f"[decision]      ANSWER: {out.answer[:200]}{'...' if len(out.answer) > 200 else ''}")

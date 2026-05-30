@@ -20,7 +20,7 @@ def _should_retry(exc: Exception) -> bool:
 
 
 class LLM:
-    def __init__(self, base_url: str = DEFAULT_URL, timeout: float = 600):
+    def __init__(self, base_url: str = DEFAULT_URL, timeout: float = 120):
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 

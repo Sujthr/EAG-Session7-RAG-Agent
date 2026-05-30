@@ -735,7 +735,7 @@ class OllamaProvider(BaseProvider):
             elif rf.get("type") == "json_object":
                 body["format"] = "json"
 
-        async with httpx.AsyncClient(timeout=600) as c:
+        async with httpx.AsyncClient(timeout=90) as c:
             r = await c.post(f"{self.base_url}/api/chat", json=body)
             if r.status_code != 200:
                 raise ProviderError(f"ollama HTTP {r.status_code}: {r.text[:300]}", status=r.status_code)

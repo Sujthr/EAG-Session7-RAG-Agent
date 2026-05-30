@@ -154,7 +154,7 @@ try {
 } catch {
     Write-Host "      WARNING: /v1/chat smoke test failed: $_" -ForegroundColor Yellow
     Write-Host "      Check $GWLOG and $GWLOG.err for details." -ForegroundColor Yellow
-    Write-Host "      Proceeding anyway — gateway may still work for real queries." -ForegroundColor Yellow
+    Write-Host "      Proceeding anyway - gateway may still work for real queries." -ForegroundColor Yellow
 }
 
 # ── Step 4: Warm up Ollama (load model into VRAM before first query) ──────────

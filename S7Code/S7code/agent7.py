@@ -26,9 +26,17 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 import uuid
 from pathlib import Path
+
+# Windows pipes default to charmap (cp1252); force UTF-8 so Unicode content
+# (e.g. Wikipedia pages with → glyphs) doesn't raise UnicodeEncodeError.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -66,15 +74,21 @@ async def run(query: str) -> str:
     print(f"run {run_id}  ─  query: {query}")
     print(f"{'═' * 78}")
 
-    # Durable memory: classify the user's query so facts/preferences in it
-    # survive into future runs. Tool outcomes get recorded later by Action;
-    # the query itself only gets a memory record if we put it there now.
+    # Persist the user query as a fact so it survives future runs. Use
+    # add_fact (no LLM classifier) — user queries are always facts and the
+    # LLM classify call adds no value while costing an extra API round-trip.
     try:
-        memory.remember(query, source="user_query", run_id=run_id)
+        memory.add_fact(
+            descriptor=query[:200],
+            value={"raw": query},
+            source="user_query",
+            run_id=run_id,
+        )
     except Exception as e:
-        print(f"[memory.remember] skipped: {e}")
+        print(f"[memory.record_query] skipped: {e}")
 
-    server_params = StdioServerParameters(command=sys.executable, args=[str(MCP_SERVER)])
+    _env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    server_params = StdioServerParameters(command=sys.executable, args=[str(MCP_SERVER)], env=_env)
     history: list[dict] = []
     prior_goals: list[Goal] = []
     final_answer: str = ""
@@ -144,6 +158,14 @@ async def run(query: str) -> str:
                         "text": out.answer,
                     })
                     final_answer = out.answer
+                    # Mark this goal done locally so the next iteration's
+                    # Perception call is skipped when no work remains.
+                    prior_goals = [
+                        g.model_copy(update={"done": True}) if g.id == goal.id else g
+                        for g in prior_goals
+                    ]
+                    if all(g.done for g in prior_goals):
+                        break
                     continue
 
                 # 4. ACTION

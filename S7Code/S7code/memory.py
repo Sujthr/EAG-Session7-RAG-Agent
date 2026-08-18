@@ -77,15 +77,24 @@ def _index() -> VectorIndex:
     return idx
 
 
+_embed_cache: dict[tuple[str, str], list[float]] = {}
+
+
 def _try_embed(text: str, task_type: str) -> list[float] | None:
-    """Compute an embedding via the gateway. Returns None if the gateway is
-    unavailable. The caller decides whether to persist a non-embedded item."""
+    """Compute an embedding via the gateway. Results are cached by (text,
+    task_type) so repeated calls with the same query string (e.g. the agent
+    query re-read on every loop iteration) hit the cache instead of the API."""
+    key = (text, task_type)
+    if key in _embed_cache:
+        return _embed_cache[key]
     try:
         resp = _gateway_embed(text, task_type=task_type)
-        return list(resp["embedding"])
+        result = list(resp["embedding"])
+        _embed_cache[key] = result
+        return result
     except Exception as e:
         print(f"[memory] embedding failed ({e!r}); item written without vector")
-        return None
+        return None  # failures not cached — gateway may recover
 
 
 # ── keyword search (Session 6 path, used as fallback) ───────────────────────

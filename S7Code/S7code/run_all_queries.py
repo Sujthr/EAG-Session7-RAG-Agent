@@ -173,6 +173,16 @@ def main() -> None:
             "log": f"{label}.log",
         })
 
+        # Clean per-query answer summary printed to terminal after all debug output.
+        print(f"\n{'─' * 78}")
+        print(f"  [{label}]  {text[:100]}{'...' if len(text) > 100 else ''}")
+        print(f"  Time: {elapsed:.1f}s")
+        if error:
+            print(f"  ERROR: {error}")
+        else:
+            print(f"  ANSWER:\n{answer}")
+        print(f"{'─' * 78}\n")
+
         if i < len(QUERIES) - 1:
             print(f"[runner] sleeping {INTER_QUERY_DELAY}s before next query...")
             time.sleep(INTER_QUERY_DELAY)

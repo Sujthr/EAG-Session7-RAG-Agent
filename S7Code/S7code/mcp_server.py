@@ -26,7 +26,17 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
+
+# On Windows the subprocess pipe encoding defaults to charmap (cp1252).
+# Reconfigure to UTF-8 so fetched web content with non-ASCII chars (→, ✓, …)
+# doesn't raise UnicodeEncodeError before FastMCP can serialize the result.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -38,7 +48,6 @@ from mcp.server.fastmcp import FastMCP
 
 # Same-directory imports for the Memory and Artifact services so that the
 # new index_document / search_knowledge tools can delegate into them.
-import sys
 sys.path.insert(0, str(Path(__file__).parent))
 import artifacts as _artifacts  # noqa: E402
 import memory as _memory  # noqa: E402
